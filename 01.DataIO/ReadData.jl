@@ -3,6 +3,7 @@
 # データ読み込みに関するいくつかの方法。
 # ####################################################
 
+
 # working directory の変更(このフォルダのなかに読み込みたいデータがある)。
 cd("C:\\Users\\tetsuhiro.honda\\JuliaLangJP\\DataSet")
 
@@ -10,7 +11,12 @@ cd("C:\\Users\\tetsuhiro.honda\\JuliaLangJP\\DataSet")
 readdir()
 
 
+
 # 1.tsvファイルを読み込む1 (読み込んだ後は Array)
+
+# 参考サイト
+# http://randyzwitch.com/julia-import-data/
+
 iris_array = readdlm("iris.tsv", '\t', has_header = true)
 
 	# 注意
@@ -34,7 +40,27 @@ iris_array = readdlm("iris.tsv", '\t', has_header = true)
 	iris_array[2][3]
 
 
+
 # 2.tsvファイルを読み込む2 (読み込んだ後は DataFrame)
+
+# 参考サイト
+# http://randyzwitch.com/julia-import-data/
+# http://juliastats.github.io/DataFrames.jl/io.html
+
+Pkg.add("DataFrames") 
+using DataFrames
+
+iris_df = readtable("iris.tsv", separator = '\t', header = true)
+
+	# 数行表示
+	head(iris_df)
+
+	# 行数と列数
+	size(iris_df)
+
+	# Rでいうclass関数みたいなやつ。
+	typeof(iris_df)
+
 
 
 # 3.tsvファイルを一行ずつ読み込む
