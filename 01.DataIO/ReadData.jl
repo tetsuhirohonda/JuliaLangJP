@@ -12,7 +12,29 @@ readdir()
 
 
 
-# 1.tsvファイルを読み込む1 (読み込んだ後は Array)
+# 1.tsvファイルを読み込む1 (読み込んだ後は DataFrame)
+
+# 参考サイト
+# http://randyzwitch.com/julia-import-data/
+# http://juliastats.github.io/DataFrames.jl/io.html
+
+Pkg.add("DataFrames") 
+using DataFrames
+
+iris_df = readtable("iris.tsv", separator = '\t', header = true)
+
+	# 数行表示
+	head(iris_df)
+
+	# 行数と列数
+	size(iris_df)
+
+	# Rでいうclass関数みたいなやつ。
+	typeof(iris_df)
+
+
+
+# 2.tsvファイルを読み込む2 (読み込んだ後は Array)
 
 # 参考サイト
 # http://randyzwitch.com/julia-import-data/
@@ -41,31 +63,30 @@ iris_array = readdlm("iris.tsv", '\t', has_header = true)
 
 
 
-# 2.tsvファイルを読み込む2 (読み込んだ後は DataFrame)
+# 3.データベースにあるテーブルを読み込む(postgresql)
 
 # 参考サイト
 # http://randyzwitch.com/julia-import-data/
-# http://juliastats.github.io/DataFrames.jl/io.html
+# https://github.com/quinnj/ODBC.jl
 
-Pkg.add("DataFrames") 
-using DataFrames
+Pkg.add("ODBC") 
+using ODBC
 
-iris_df = readtable("iris.tsv", separator = '\t', header = true)
+# 接続開始
+co = ODBC.connect("pj020010", usr="tetsuhiro.honda", pwd="XXXXX")
 
-	# 数行表示
-	head(iris_df)
+#データをgreenplumから引っ張ってくる。
+results = query(" select * from iris_postgres_table;")
 
-	# 行数と列数
-	size(iris_df)
+# 読み込んだ後は DataFrameでした。
+typeof(results)
 
-	# Rでいうclass関数みたいなやつ。
-	typeof(iris_df)
-
-
-
-# 3.tsvファイルを一行ずつ読み込む
+# 接続終了
+ODBC.disconnect(co) 
 
 
-# 4.データベースにあるテーブルを読み込む
 
+# 4.tsvファイルを一行ずつ読み込む
+
+まだやってません。
 
