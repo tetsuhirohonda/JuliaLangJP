@@ -1,0 +1,131 @@
+############################################################
+
+#doc
+#http://hypothesistestsjl.readthedocs.org/en/latest/api.html
+
+#how to use pvalue
+    #pvalue(test::HypothesisTest; tail=:both)
+#how to use ci
+    #ci(test::HypothesisTest, alpha=0.05; tail=:both)
+
+#list of parametric method hypothesistest
+#http://hypothesistestsjl.readthedocs.org/en/latest/parametric.html
+
+    #OneSampleTTest(v::AbstractVector{T<:Real}, mu0::Real=0)
+    #Perform a one sample t-test of the null hypothesis that the data in vector v comes from a distribution with mu0 against the alternative hypothesis that the distribution does not have mean mu0.
+
+    #OneSampleTTest(xbar::Real, stdev::Real, n::Int, mu0::Real=0)
+    #Perform a one sample t-test of the null hypothesis that n values with mean xbar and sample standard deviation stdev come from a distribution with mu0 against the alternative hypothesis that the distribution does not have mean mu0.
+
+    #OneSampleTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real}, mu0::Real=0)
+    #Perform a paired sample t-test of the null hypothesis that the differences between pairs of values in vectors x and y come from a distribution with mu0 against the alternative hypothesis that the distribution does not have mean mu0.
+
+    #EqualVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    #Perform a two-sample t-test of the null hypothesis that x and y come from a distributions with the same mean and equal variances against the alternative hypothesis that the distributions have different means and but equal variances.
+
+    #UnequalVarianceTTest(x::AbstractVector{T<:Real}, y::AbstractVector{T<:Real})
+    #Perform an unequal variance two-sample t-test of the null hypothesis that x and y come from a distributions with the same mean against the alternative hypothesis that the distributions have different means.
+    #This test is also known as sometimes known as Welch’s t-test. It differs from the equal variance t-test in that it computes the number of degrees of freedom of the test using the Welch-Satterthwaite equation:
+
+#list of nonparametric method hypothesistest
+#http://hypothesistestsjl.readthedocs.org/en/latest/nonparametric.html
+
+    #skip
+
+
+############################################################
+
+##script
+#read package
+Pkg.add("HypothesisTests")
+Pkg.add("RDataset")
+
+#data set
+using RDatasets
+iris = dataset("datasets", "iris")
+diamonds = dataset("ggplot2", "diamonds")
+
+#hypothesis test
+using HypothesisTests
+
+##Warning
+#Warning: could not import Base.foldl into NumericExtensions
+#Warning: could not import Base.foldr into NumericExtensions
+#Warning: could not import Base.sum! into NumericExtensions
+#Warning: could not import Base.maximum! into NumericExtensions
+#Warning: could not import Base.minimum! into NumericExtensions
+
+#tips
+#https://github.com/lindahua/NumericExtensions.jl/issues/26
+#Pkg.pin("NumericExtensions",v"0.2.20") #??
+
+println(iris)
+
+
+x = iris[1]
+y= iris[4]
+
+#Checking function by HypthesisTest.pvalue
+#One sample test 一標本t検定
+
+#get pvalue
+pvalue(OneSampleTTest(x))
+#3.3312556725564995e-129
+
+#get result of hypothesis test
+OneSampleTTest(x)
+###
+#t = 86.425374617217
+#df = 149
+#s = 0.0676113162275986
+#Two-sided p-value:
+#   p = 3.3312556725564995e-129
+#95% confidence interval:
+#   (5.709732481506687,5.976934185159977)
+###
+pvalue(OneSampleTTest(x), tail=:left)
+pvalue(OneSampleTTest(x), tail=:right)
+
+#Compute a confidence interval
+#ci(test::HypothesisTest, alpha=0.05; tail=:both)
+#default alpha=0.05 95%
+ci(OneSampleTTest(x))
+ci(OneSampleTTest(x, tail=:left))#ErrorException("function OneSampleTTest does not accept keyword arguments")
+ci(OneSampleTTest(x, tail=:right))
+
+OneSampleTTest(x).t
+OneSampleTTest(x).df
+
+#
+pvalue(OneSampleTTest(x, y))
+#長さ同じなのに同じ長さにしろと怒られる。。
+#julia> length(iris[1])
+#150
+#julia> length(iris[2])
+#150
+#julia> pvalue(OneSampleTTest(x, y))
+#MethodError(check_same_length,([5.1,4.9......
+
+pvalue(EqualVarianceTTest(x, y))#等分散性の検定　# var.test(sample1, sample2)
+pvalue(UnequalVarianceTTest(x, y))#独立性の検定？
+
+#あまり詳しくないので参考程度に
+pvalue(MannWhitneyUTest(x, y))
+pvalue(SignedRankTest(x, y))
+pvalue(SignedRankTest(x))
+
+
+#R code(from http://cse.naro.affrc.go.jp/takezawa/r-tips/r/64.html）
+#group1 <- c(0.7,-1.6,-0.2,-1.2,-0.1,3.4,3.7,0.8,0.0,2.0)    # 睡眠時間の増加
+#t.test(group1,mu=0)
+
+
+###
+#EqualVarianceTTest(x, y) and UnequalVarianceTTest(x, y)
+#When can this test be used?
+#There are two samples from two populations. (The samples can be different sizes.)
+#The two samples are independent.
+#Both populations are normally distributed or both sample sizes are large enough that the means are normally distributed.
+#(A rule of thumb is that the sample size is large enough if n ≥ 15.)
+#Both population standard deviations, σx and σy, are unknown, but are assumed to be equal.
+###
